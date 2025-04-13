@@ -11,7 +11,7 @@
 class Text
 {
 public:
-    // 建议添加虚析构函数 virtual ~Text() = default;
+    virtual ~Text() = default;
     virtual std::string render() = 0;
 };
 
