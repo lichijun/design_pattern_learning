@@ -488,6 +488,54 @@ classDiagram
 [点击跳转](./design_pattern_excercise/structural_patterns/proxy/proxy_adjustedAns.cpp)  
 **C++编程小知识**  
 
+# 行为模式
+## 责任链模式(CoR)
+
+### 应用场景
+- 程序需要使用不同方式处理不同种类请求， 而且请求类型和顺序预先未知，未来可能还会有新的请求
+- 必须按顺序执行处理者的场景
+
+### 实现方式
+1. 定义处理者基类，基类一般包含处理函数和设置后继处理者函数
+2. 在客户端中创建具体处理者，基于具体处理者创建处理链
+```mermaid
+classDiagram
+    class AbstractLogger {
+        <<abstract>>
+        - nextLogger: AbstractLogger*
+        - level: LogLevel
+        + setNextLogger(AbstractLogger* next)
+        + logMessage(LogLevel level, const string& message)
+        + write(const string& message)*
+    }
+
+    class ConsoleLogger {
+        + write(const string& message) override
+    }
+
+    class FileLogger {
+        - filename: string
+        + write(const string& message) override
+    }
+
+    AbstractLogger <|-- ConsoleLogger
+    AbstractLogger <|-- FileLogger
+    AbstractLogger <-- AbstractLogger : nextLogger
+```
+
+### 编程练习
+**背景**   
+实现一个日志处理系统，使用责任链模式设计不同严重级别的日志处理器  
+**要求**​​
+1. 日志有四种严重级别：`DEBUG`、`INFO`、`WARNING`、`ERROR`
+2. 每个处理器只处理特定级别及以上的日志
+3. 处理器可以选择将日志输出到不同位置（控制台、文件等）
+4. 日志处理顺序应可动态调整
+
+**C++实现**  
+[点击跳转](./design_pattern_excercise/behaviour_patterns/CoR/CoR.cpp)  
+**C++编程小知识**  
+
 ## XXX模式(XXX)
 
 ### 应用场景
@@ -500,8 +548,6 @@ classDiagram
 **C++实现**  
 [点击跳转](./design_pattern_excercise/structural_patterns)  
 **C++编程小知识**  
-
-# 行为模式
 
 # 参考资料
 
