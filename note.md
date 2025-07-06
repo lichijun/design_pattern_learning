@@ -536,6 +536,130 @@ classDiagram
 [点击跳转](./design_pattern_excercise/behaviour_patterns/CoR/CoR.cpp)  
 **C++编程小知识**  
 
+## 命令模式（Command）
+将操作（请求）封装成对象（命令）。实现请求的参数化，从而进行更加灵活的处理：比如延迟请求（放入stack），委托处理，序列化
+
+### 应用场景
+- 某个方法需要接受一个参数，这个参数代表某一个操作
+- 操作需要放入栈/队列
+- 需要实现操作的回滚（undo/redo）
+
+### 实现方式
+- 定义接收者类(Receiver)，它是命令的实际执行者
+- 定义命令类(Command)的基类和具体子类，它包含接收者对象和execute方法，在execute方法中让接收者执行命令。
+- 定义发送者类(Invoker)，它不直接给发送者发送命令，而是触发命令对象。
+- 客户端定义命令，并调用Invoker处理命令。**相比于客户端直接调用接收者的接口执行请求，命令模式多了Invoker和Command这两层，实现了更加灵活的操作**，比如：Invoker可以记录请求，实现回滚；Command可以将多个请求组合在一起
+```mermaid
+classDiagram
+    class Light {
+        +On() : void
+        +Off() : void
+    }
+    class AC {
+        +On() : void
+        +Off() : void
+    }
+    class Speaker {
+        +On() : void
+        +Off() : void
+    }
+
+    class Command {
+        <<abstract>>
+        +execute() : void
+        +undo() : void
+        +getInfo() : string
+    }
+    class LightOnCommand {
+        +LightOnCommand(Light& light)
+        +execute() : void
+        +undo() : void
+        +getInfo() : string
+        -Light& _light
+    }
+    class LightOffCommand {
+        +LightOffCommand(Light& light)
+        +execute() : void
+        +undo() : void
+        +getInfo() : string
+        -Light& _light
+    }
+    class ACOpenCommand {
+        +ACOpenCommand(AC& AC)
+        +execute() : void
+        +undo() : void
+        +getInfo() : string
+        -AC& _AC
+    }
+    class SpeakerOnCommand {
+        +SpeakerOnCommand(Speaker& speaker)
+        +execute() : void
+        +undo() : void
+        +getInfo() : string
+        -Speaker& _speaker
+    }
+    class MacroCommand {
+        +execute() : void
+        +undo() : void
+        +getInfo() : string
+        +addCommand(unique_ptr<Command>)
+        +clearCommands()
+        -vector<unique_ptr<Command>> _pCommands
+    }
+
+    class operationRecord {
+        +operationRecord(int, string)
+        +int sequence
+        +string operation
+    }
+    class RemoteControl {
+        +executeCommand(unique_ptr<Command>)
+        +showHistory()
+        +undo()
+        +redo()
+        -vector<unique_ptr<Command>> _executedCmds
+        -vector<unique_ptr<Command>> _undoedCmds
+        -vector<operationRecord> _history
+        -int operationSequence
+    }
+
+    %% Inheritance
+    Command <|-- LightOnCommand
+    Command <|-- LightOffCommand
+    Command <|-- ACOpenCommand
+    Command <|-- SpeakerOnCommand
+    Command <|-- MacroCommand
+
+    %% MacroCommand composition
+    MacroCommand o-- Command : "commands"
+
+    %% RemoteControl composition
+    RemoteControl o-- Command : "executedCmds"
+    RemoteControl o-- Command : "undoedCmds"
+    RemoteControl o-- operationRecord : "history"
+
+    %% Command dependencies on receivers
+    LightOnCommand ..> Light
+    LightOffCommand ..> Light
+    ACOpenCommand ..> AC
+    SpeakerOnCommand ..> Speaker
+```
+
+### 编程练习
+**背景**  
+使用命令模式实现一个智能家居控制系统
+**要求**​​  
+1. 支持控制多种设备（灯、空调、音响）
+2. 支持一键执行宏命令（设备组合操作）
+3. 支持撤销最近一次操作
+4. 支持命令历史记录查询
+
+**C++实现**  
+[点击跳转](./design_pattern_excercise/behaviour_patterns/command/command_adjustedAns.cpp)  
+**C++编程小知识** 
+- 使用unique_ptr保存命令，防止内存泄漏。用unique_ptr是因为命令在每个阶段的所有权是单一的
+- unique_ptr被move以后，unique_ptr中维护的指针被清空，再次访问unique_ptr会出现访问空指针导致的段错误
+
 ## XXX模式(XXX)
 
 ### 应用场景
